@@ -1,0 +1,90 @@
+# Quantumult X AI 代理分流规则
+#
+# 参考: https://shuita.xyz/rules（独立整理版，非网页72条原文逐字导出）
+# 68 domain + 4 IP CIDR. 使用 filter_remote 的 force-policy=🤖AI 指定策略。
+# 包含共享校验/遥测域名，可能影响非 AI App；请根据实际请求日志调整。
+# Anthropic CIDR 故意不加 no-resolve。
+
+# 关键校验与检测
+host,challenges.cloudflare.com
+host-suffix,sentry.io
+host-suffix,statsigapi.net
+host-suffix,featuregates.org
+host,api.ipify.org
+host,claude-check.shuita.xyz
+host-suffix,ip.sb
+
+# Claude / Anthropic
+host-keyword,anthropic
+host-keyword,claude
+host-suffix,anthropic.com
+host-suffix,claude.ai
+host-suffix,claude.com
+host-suffix,claude.dev
+host-suffix,clau.de
+host-suffix,claudeusercontent.com
+host-suffix,claudemcpclient.com
+host-suffix,claudemcpusercontent.com
+host-suffix,fullstack-anthropic-website-b-cdn.net
+host,http-intake.logs.us5.datadoghq.com
+host,http-intake.us5.datadoghq.com
+host,browser-intake-us5-datadoghq.com
+host,api.anthropic.com
+host,console.anthropic.com
+host,platform.claude.com
+host,ipify.org
+
+# OpenAI / ChatGPT
+host-suffix,openai.com
+host-suffix,chatgpt.com
+host-suffix,oaistatic.com
+host-suffix,oaiusercontent.com
+host-suffix,openaiapi-site.azureedge.net
+host,auth0.openai.com
+host,chat.openai.com
+host,api.openai.com
+host,platform.openai.com
+host,cdn.oaistatic.com
+host,files.oaiusercontent.com
+host-suffix,livekit.cloud
+host-suffix,livekit.io
+host-suffix,intercom.io
+host-suffix,intercomcdn.com
+host-suffix,identrust.com
+host-suffix,cdn.auth0.com
+host-suffix,statsig.com
+host-suffix,openai-cdn.com
+
+# Gemini / Google AI
+host,gemini.google.com
+host,aistudio.google.com
+host,ai.google.dev
+host,notebooklm.google.com
+host,alkalimakersuite-pa.clients6.google.com
+host,generativelanguage.googleapis.com
+host,ai.googleapis.com
+host,proactivebackend-pa.googleapis.com
+host,bard.google.com
+host,makersuite.google.com
+host,geller-pa.googleapis.com
+host,content-autofill.googleapis.com
+
+# 其他 AI 工具
+host-suffix,cursor.com
+host-suffix,cursor.sh
+host-suffix,codeium.com
+host-suffix,windsurf.com
+host-suffix,x.ai
+host-suffix,grok.com
+host-suffix,perplexity.ai
+host-suffix,openrouter.ai
+host-suffix,huggingface.co
+host-suffix,kiro.dev
+host-suffix,zed.dev
+host-suffix,phind.com
+
+# Anthropic IPv4/IPv6
+ip-cidr,160.79.104.0/21
+ip-cidr,153.61.208.0/20
+ip-cidr,153.61.224.0/22
+ip6-cidr,2607:6bc0::/32
