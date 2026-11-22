@@ -12,7 +12,7 @@
 
 `https://raw.githubusercontent.com/wenxiaoa/QuantumultX/master/Weibo/WeiboAds.list`
 
-脚本固定版本：`https://raw.githubusercontent.com/wenxiaoa/QuantumultX/master/Weibo/releases/v1.0.0.js`
+脚本固定版本：`https://raw.githubusercontent.com/wenxiaoa/QuantumultX/master/Weibo/releases/v1.0.1.js`
 源码：`https://raw.githubusercontent.com/wenxiaoa/QuantumultX/master/Weibo/weibo.js`
 
 启用 QX 重写与 MITM，安装并信任证书，关闭“兼容性增强”。在 QX 的分流模式使用时，订阅分流文件；`sdkapp.uve.weibo.com` 直连仅指定连接策略，匹配的广告 API 路径仍由重写处理。避免与其他微博改写重复启用。
