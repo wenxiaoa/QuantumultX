@@ -4,18 +4,20 @@
 
 ## 订阅
 
-在 QX 添加重写资源：
+仅添加重写资源不足以拦截 `adstrategy.biz.weibo.com` 广告接口。请把下面两项都添加到 QX：
+
+重写资源：
 
 `https://raw.githubusercontent.com/wenxiaoa/QuantumultX/master/WeiboAds.conf`
 
-配套分流（可选但建议添加到 `[filter_remote]`）：
+配套分流（必须添加到 `[filter_remote]`）：
 
 `https://raw.githubusercontent.com/wenxiaoa/QuantumultX/master/Weibo/WeiboAds.list`
 
 脚本固定版本：`https://raw.githubusercontent.com/wenxiaoa/QuantumultX/master/Weibo/releases/v1.0.1.js`
 源码：`https://raw.githubusercontent.com/wenxiaoa/QuantumultX/master/Weibo/weibo.js`
 
-启用 QX 重写与 MITM，安装并信任证书，关闭“兼容性增强”。在 QX 的分流模式使用时，订阅分流文件；`sdkapp.uve.weibo.com` 直连仅指定连接策略，匹配的广告 API 路径仍由重写处理。避免与其他微博改写重复启用。
+启用 QX 重写与 MITM，安装并信任证书，关闭“兼容性增强”。必须同时启用分流订阅，其中 `adstrategy.biz.weibo.com` 的 `reject` 规则负责拦截微博广告策略接口；`sdkapp.uve.weibo.com` 直连仅指定连接策略，匹配的广告 API 路径仍由重写处理。避免与其他微博改写重复启用。
 
 ## 功能和设置
 
