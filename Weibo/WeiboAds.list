@@ -1,0 +1,5 @@
+# 微博净化配套分流；在 filter_remote 中引用，不要使用 force-policy 覆盖策略。
+# sdkapp 直连仅决定连接路线，具体广告路径仍由重写处理。
+host, sdkapp.uve.weibo.com, direct
+host, adstrategy.biz.weibo.com, reject
+host-suffix, api.touch-moblie.com, reject
