@@ -262,7 +262,8 @@
       }));
     };
     filter(data.items);
-    filter(data.pageHeader?.data?.items);
+    // Match the upstream behaviour: the comment header keeps only the detail module.
+    if (Array.isArray(data.pageHeader?.data?.items)) data.pageHeader.data.items = data.pageHeader.data.items.filter(item => item?.category === 'detail');
     cleanCommentTree(data, cfg, 0);
     if (cfg.removeNoticeTips) delete data.tip_msg;
   }
