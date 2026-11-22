@@ -1,5 +1,5 @@
 /*
- * Weibo Cleaner 1.0.0 — Quantumult X, wenxiaoa/QuantumultX
+ * Weibo Cleaner 1.0.1 — Quantumult X, wenxiaoa/QuantumultX
  * Interface coverage and filtering criteria informed by ddgksf2013 and zmqcherish.
  * Reference: https://github.com/ddgksf2013/Rewrite/blob/master/AdBlock/WeiboAds.conf
  * Reimplemented with explicit dispatch, validated settings and original-body fallback.
@@ -7,7 +7,7 @@
  */
 (function () {
   'use strict';
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
   // Compatibility defaults preserve the reference's EFFECTIVE behaviour, not its stale comments.
   const DEFAULTS = Object.freeze({
     enabled: true, debug: false,
@@ -233,16 +233,37 @@
       data.custom_action_list = allowed.filter(x => x?.type === 'mblog_menus_copy_url').concat(allowed.filter(x => x?.type !== 'mblog_menus_copy_url'));
     }
   }
+  function commentAd(item, cfg) {
+    if (!object(item)) return false;
+    const value = object(item.data) ? item.data : item;
+    const labels = [value.adType, value.ad_type, value.card_type_name, value.title, value.desc, value.content_auth_info?.content_auth_title];
+    if (labels.some(label => ['广告', '廣告', '热推', '推广'].includes(label)) || [6, 236].includes(value.card_type) ||
+        has(value.actionlog?.ext, 'ads_word') || has(value.itemid, 'ads_word') || ad(value) || hidden(value.mblog, cfg)) return true;
+    if (cfg.removeRelateItem && labels.includes('相关内容')) return true;
+    return cfg.removeRecommendItem && labels.some(label => ['推荐', '推薦', '荐读'].includes(label));
+  }
+  function cleanCommentTree(value, cfg, depth) {
+    if (!object(value) || depth > 8) return;
+    for (const key of ['items', 'card_group', 'cards']) {
+      if (Array.isArray(value[key])) {
+        value[key] = value[key].filter(item => !commentAd(item, cfg));
+        value[key].forEach(item => cleanCommentTree(item, cfg, depth + 1));
+      }
+    }
+    if (object(value.data)) cleanCommentTree(value.data, cfg, depth + 1);
+  }
   function comments(data, cfg) {
-    if (cfg.removeNoticeTips && Array.isArray(data.pageHeader?.data?.items)) data.pageHeader.data.items = data.pageHeader.data.items.filter(x => !x?.category || x.category === 'detail');
-    if (Array.isArray(data.items)) data.items = data.items.filter(item => {
-      const value = item?.data;
-      if (!object(value)) return true;
-      if (['广告', '廣告', '热推'].includes(value.adType) || [6, 236].includes(value.card_type)) return false;
-      if (cfg.removeRelateItem && value.adType === '相关内容') return false;
-      if (cfg.removeRecommendItem && ['推荐', '推薦', '荐读'].includes(value.adType)) return false;
-      return !hidden(value.mblog, cfg);
-    });
+    const filter = list => {
+      if (!Array.isArray(list)) return;
+      list.splice(0, list.length, ...list.filter(item => {
+        if (commentAd(item, cfg)) return false;
+        cleanCommentTree(item, cfg, 0);
+        return true;
+      }));
+    };
+    filter(data.items);
+    filter(data.pageHeader?.data?.items);
+    cleanCommentTree(data, cfg, 0);
     if (cfg.removeNoticeTips) delete data.tip_msg;
   }
   function profileSkin(item, icons) {
