@@ -95,3 +95,8 @@ BoxJS访问地址设定为 http://boxjs.com/
 
  * [@chavyleung](https://github.com/chavyleung)
  
+
+
+### 微博净化
+
+Quantumult X 微博净化订阅与说明：[Weibo](Weibo/README.md)。重写配置：`https://raw.githubusercontent.com/wenxiaoa/QuantumultX/master/WeiboAds.conf`。
