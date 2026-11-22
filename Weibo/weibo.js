@@ -1,5 +1,5 @@
 /*
- * Weibo Cleaner 1.0.1 — Quantumult X, wenxiaoa/QuantumultX
+ * Weibo Cleaner 1.0.2 — Quantumult X, wenxiaoa/QuantumultX
  * Interface coverage and filtering criteria informed by ddgksf2013 and zmqcherish.
  * Reference: https://github.com/ddgksf2013/Rewrite/blob/master/AdBlock/WeiboAds.conf
  * Reimplemented with explicit dispatch, validated settings and original-body fallback.
@@ -7,7 +7,7 @@
  */
 (function () {
   'use strict';
-  const VERSION = '1.0.1';
+  const VERSION = '1.0.2';
   // Compatibility defaults preserve the reference's EFFECTIVE behaviour, not its stale comments.
   const DEFAULTS = Object.freeze({
     enabled: true, debug: false,
@@ -253,17 +253,16 @@
     if (object(value.data)) cleanCommentTree(value.data, cfg, depth + 1);
   }
   function comments(data, cfg) {
-    const filter = list => {
-      if (!Array.isArray(list)) return;
-      list.splice(0, list.length, ...list.filter(item => {
-        if (commentAd(item, cfg)) return false;
-        cleanCommentTree(item, cfg, 0);
-        return true;
-      }));
+    if (data.pageHeader && object(data.pageHeader.data) && Array.isArray(data.pageHeader.data.items)) {
+      data.pageHeader.data.items = data.pageHeader.data.items.filter(item => item?.category === 'detail');
+    }
+    const labels = ['广告', '廣告', '相关内容', '推荐', '热推', '推薦', '荐读'];
+    const remove = item => {
+      const value = item?.data || {};
+      return labels.includes(value.adType || '') || value.card_type === 6 || value.card_type === 236;
     };
-    filter(data.items);
-    // Match the upstream behaviour: the comment header keeps only the detail module.
-    if (Array.isArray(data.pageHeader?.data?.items)) data.pageHeader.data.items = data.pageHeader.data.items.filter(item => item?.category === 'detail');
+    if (Array.isArray(data.items)) data.items = data.items.filter(item => !remove(item));
+    // Some newer responses nest the same promotional cards under an item or card group.
     cleanCommentTree(data, cfg, 0);
     if (cfg.removeNoticeTips) delete data.tip_msg;
   }
@@ -375,7 +374,7 @@
   const end = '(?:\\?|$)';
   function route(id, path, handler) { return { id, pattern: API + '(?:' + path + ')' + end, handler }; }
   const ROUTES = [
-    route('comments', 'statuses/container_detail', 'comments'),
+    { id: 'comments', pattern: '^https?:\\/\\/api\\.weibo\\.cn\\/\\d\\/statuses\\/container_detail', handler: 'comments' },
     route('sidebar', 'ug/checkin/stream', 'sidebar'),
     route('groups', 'groups/allgroups/v\\d+', 'groups'),
     route('anonymous', '\\w{5}/(?:statuses_unread_hot_timeline|timeline)', 'timeline'),
@@ -456,7 +455,9 @@
       // Only the known sdkad PHP endpoint accepts the literal OK suffix.
       const suffix = name === 'php' ? 'OK' : '';
       const text = suffix && /OK\s*$/.test(body) ? body.replace(/OK\s*$/, '') : body;
-      const data = JSON.parse(text.replace(/^\uFEFF/, ''));
+      const match = text.match(/\{.*\}/s);
+      if (!match) return { body, changed: false };
+      const data = JSON.parse(match[0].replace(/^\uFEFF/, ''));
       if (!object(data)) return { body, changed: false };
       // Do not turn authentication/errors into apparently successful API responses.
       if ((data.ok === 0) || data.error || data.error_code || (typeof data.retcode === 'number' && ![0, 20000000].includes(data.retcode))) return { body, changed: false };
